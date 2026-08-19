@@ -1,0 +1,1 @@
+# lamare-kiosk
