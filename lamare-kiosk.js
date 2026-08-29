@@ -134,15 +134,16 @@ function reset(){var q=getPad();if(q&&q.bs){for(var j=0;j<5;j++)ck(q.bs);}num=''
 
 function plateMatchCount(entered){var els=document.querySelectorAll('td,div,span,li,option,tr,button');var set={},c=0;for(var i=0;i<els.length;i++){var e=els[i];if(!vis(e)||e.children.length)continue;if(e.closest&&e.closest('#lk-selbar'))continue;var t=n(e.textContent);var m=t.match(/(\d{2,3}\s?[가-힣]\s?\d{4})/g);if(!m)continue;for(var k=0;k<m.length;k++){var d=m[k].replace(/[^0-9]/g,'');if(d.slice(-4)===entered){var key=m[k].replace(/\s/g,'');if(!set[key]){set[key]=1;c++;}}}}return c;}
 function isSelectPopup(entered){var els=document.querySelectorAll('div,span,p,td,h1,h2,h3,strong,b');for(var i=0;i<els.length;i++){var e=els[i];if(!vis(e)||e.children.length)continue;if(e.closest&&e.closest('#lk-selbar'))continue;var t=n(e.textContent);if(t.length>40)continue;if(/차량\s*선택|차량번호\s*선택|차량을\s*선택|선택해\s*주세요|여러\s*대|목록에서|차량이\s*여러/.test(t))return true;}return plateMatchCount(entered)>=2;}
-function classifyModal(t){t=n(t);if(/검색된 차량이 없|조회되지 않|조회된 차량이 없|차량이 없/.test(t))return{msg:'차량을 찾을 수 없습니다',sub:'번호를 다시 확인해 주세요'};if(/이미 할인|이미 적용/.test(t))return{msg:'이미 할인이 적용된 차량입니다',sub:null};if(/할인 적용할 차량을 검색/.test(t))return{msg:'차량을 먼저 조회해 주세요',sub:null};return null;}
-function findErrModal(){var ph=['검색된 차량이 없습니다','할인 적용할 차량을 검색','조회되지 않','조회된 차량이 없','이미 할인'];var els=document.querySelectorAll('div,span,p,td,li');for(var i=0;i<els.length;i++){var e=els[i];if(!vis(e)||e.children.length)continue;var t=n(e.textContent);if(t.length>40)continue;for(var j=0;j<ph.length;j++){if(t.indexOf(ph[j])>-1)return e;}}return null;}
+function classifyModal(t){t=n(t);if(/검색된 차량이 없|조회되지 않|조회된 차량이 없|차량이 없/.test(t))return{msg:'차량을 찾을 수 없습니다',sub:'번호를 다시 확인해 주세요'};if(/이미 할인|이미 적용|이미 등록|중복/.test(t))return{msg:'이미 할인이 적용된 차량입니다',sub:'중복 등록은 되지 않습니다'};if(/할인 적용할 차량을 검색|먼저 조회|차량을 검색/.test(t))return{msg:'차량을 먼저 조회해 주세요',sub:null};return null;}
+function findErrModal(){var ph=['검색된 차량이 없','할인 적용할 차량을 검색','조회되지 않','조회된 차량이 없','차량이 없','이미 할인','이미 적용','이미 등록','중복'];var els=document.querySelectorAll('div,span,p,td,li');for(var i=0;i<els.length;i++){var e=els[i];if(!vis(e)||e.children.length)continue;var t=n(e.textContent);if(t.length>40)continue;for(var j=0;j<ph.length;j++){if(t.indexOf(ph[j])>-1)return e;}}return null;}
+function findAlert(){var header=false,confirm=false;var els=document.querySelectorAll('div,span,p,td,li,h1,h2,h3,strong,b,button,a');for(var i=0;i<els.length;i++){var e=els[i];if(!vis(e)||e.children.length)continue;var t=n(e.textContent);if(!t)continue;if(/^(알림|경고|안내|오류|에러|확인)$/.test(t)){if(/^(알림|경고|안내|오류|에러)$/.test(t))header=true;if(t==='확인')confirm=true;}}return (header||confirm);}
 function dismissModal(){var sv=localStorage.getItem('lamare_okbtn');if(sv){var se=bySel(sv);if(se&&vis(se)){ck(se);return true;}}var btns=document.querySelectorAll('button,a,[role=button],input[type=button],input[type=submit]');for(var i=0;i<btns.length;i++){var e=btns[i];if(!vis(e))continue;var t=n(e.tagName==='INPUT'?(e.value||''):e.textContent);if(/^(확인|닫기|예|확인하기)$/.test(t)){ck(e);return true;}}var els=document.querySelectorAll('span,div,td,p,li');for(var k=0;k<els.length;k++){var e2=els[k];if(!vis(e2)||e2.children.length)continue;var t2=n(e2.textContent);if(/^(확인|닫기)$/.test(t2)){ck(e2);return true;}}for(var m=0;m<btns.length;m++){var e3=btns[m];if(!vis(e3))continue;var lab=(((e3.getAttribute&&(e3.getAttribute('aria-label')||e3.getAttribute('title')))||'')).toLowerCase();if(/close|닫기|dismiss/.test(lab)){ck(e3);return true;}var tt=n(e3.textContent);if(/^[\u00d7\u2715xX]$/.test(tt)){ck(e3);return true;}}return false;}
 function plateOK(entered){var p=readPlate();if(!p)return false;var d=p.replace(/[^0-9]/g,'');return d.length>=4&&d.slice(-4)===entered;}
 function submit(){
   if(!num){setStat('차량번호를 입력하세요','#c0392b');return;}
   if(busy)return;busy=true;var subStart=Date.now();var plate=num;setStat('조회 중\u2026');
   var p=getPad();
-  if(findErrModal())dismissModal();
+  if(findErrModal()||findAlert()){dismissModal();if(findAlert())dismissModal();}
   clearPad(p);
   for(var zt=0;zt<num.length;zt++){if(p&&p.dg[num[zt]])ck(p.dg[num[zt]]);}
   if(p&&p.ok)ck(p.ok);
@@ -151,9 +152,11 @@ function submit(){
     if(alertG.ts>=subStart){busy=false;return;}
     var em=findErrModal();
     if(em){var rs=classifyModal(em.textContent);dismissModal();popup(false,plate,null,rs);busy=false;num='';upd();return;}
+    if(findAlert()){dismissModal();popup(false,plate,null,{msg:'다시 확인해 주세요',sub:'등록 상태를 확인해 주세요'});busy=false;num='';upd();return;}
     if(isSelectPopup(plate)){handleSelect();return;}
     if(plateOK(plate)){confirmPlate();return;}
     if(Date.now()-t0<2800){setTimeout(waitSearch,150);return;}
+    if(findAlert()){dismissModal();popup(false,plate,null,{msg:'다시 확인해 주세요',sub:'등록 상태를 확인해 주세요'});busy=false;num='';upd();return;}
     popup(false,plate,null,{msg:'차량을 찾을 수 없습니다',sub:'번호를 다시 확인해 주세요'});busy=false;num='';upd();
   })();
   function handleSelect(){
