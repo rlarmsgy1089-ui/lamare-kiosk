@@ -211,14 +211,28 @@ function submit(){
       popup(false,readPlate()||plate);busy=false;
     })();
     function verify(c){
-      var bf=cnt(c);ck(c);
+      var dsBefore=rowMinutes('할인시간');var bf=cnt(c);ck(c);
       if(alertG.ts>=subStart){busy=false;return;}
       var tv=Date.now(),retried=false;
       (function poll(){
         if(alertG.ts>=subStart){busy=false;return;}
         var em=findErrModal();if(em){var rs=classifyModal(em.textContent);dismissModal();popup(false,readPlate()||plate,null,rs);busy=false;return;}
         var cc=getCoupon(),nw=cnt(cc),dec=(bf!=null&&nw!=null&&nw<bf);
-        if(dec||applied()){var pk=rowMinutes('주차시간'),ds=rowMinutes('할인시간')||120,ti=null;if(pk!=null){var df=ds-pk;ti=(df>=0)?{rem:df}:{over:-df};}popup(true,readPlate()||plate,ti);reset();return;}
+        if(dec||applied()){
+          var t2=Date.now();
+          (function settle(){
+            if(alertG.ts>=subStart){busy=false;return;}
+            var dsNow=rowMinutes('할인시간');
+            var updated=(dsNow!=null&&dsBefore!=null&&dsNow>dsBefore);
+            if(updated||Date.now()-t2>4000){
+              var pk=rowMinutes('주차시간'),ds=rowMinutes('할인시간')||120,ti=null;
+              if(pk!=null){var df=ds-pk;ti=(df>=0)?{rem:df}:{over:-df};}
+              popup(true,readPlate()||plate,ti);reset();return;
+            }
+            setTimeout(settle,200);
+          })();
+          return;
+        }
         var el=Date.now()-tv;
         if(el>1200&&!retried){retried=true;if(cc)ck(cc);}
         if(el<3500){setTimeout(poll,200);return;}
