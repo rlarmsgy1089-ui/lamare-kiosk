@@ -89,7 +89,7 @@ ov.querySelector('#lk-gatebtn').onclick=function(e){e.stopPropagation();
 gateEl.querySelector('#lk-gateoff').onclick=function(e){e.stopPropagation();gateOff();};
 try{if(localStorage.getItem('lamare_gate')==='on')gateEl.style.display='flex';}catch(e){}
 var idleTimer=null,popupOpen=false;
-function armIdle(){clearTimeout(idleTimer);idleTimer=setTimeout(function(){if(!popupOpen)showIdle();},5000);}
+function armIdle(){clearTimeout(idleTimer);idleTimer=setTimeout(function(){if(!popupOpen)showIdle();},10000);}
 function showIdle(){num='';upd();setStat('');clearTimeout(idleTimer);try{if(findErrModal())dismissModal();clearPad(getPad());}catch(e){}idleEl.style.display='flex';}
 function goInput(){idleEl.style.display='none';num='';upd();setStat('');try{clearPad(getPad());}catch(e){}armIdle();}
 function resetIdle(){armIdle();}
